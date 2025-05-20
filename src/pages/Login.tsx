@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -8,6 +9,7 @@ export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -15,16 +17,14 @@ export default function Login() {
 
     try {
       const res = await api.post("/auth/login", { email, password });
-
-      localStorage.setItem("token", res.data.token);
-
+      login(res.data.user, res.data.token);
       navigate("/home");
     } catch (err: any) {
       alert(err.response?.data?.message || "Erro ao fazer login");
     }
   };
 
-   return (
+  return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md space-y-6">
         <div>
