@@ -1,10 +1,34 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import api from "../services/api";
 
 export default function Register() {
-  const [mostarSenha, setmostarSenha] = useState(false);
-  const [confirmarSenha, setconfirmarSenha] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+
+  const [name, setName] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmarSenha, setConfirmarSenha] = useState<string>("");
+
+  const navigate = useNavigate();
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmarSenha) {
+      return alert("Senhas não coincidem!");
+    }
+
+    try {
+      await api.post("/auth/register", { name, email, password });
+      alert("Conta criada com sucesso!");
+      navigate("/");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Erro ao registrar");
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
@@ -18,11 +42,24 @@ export default function Register() {
             participar da comunidade.
           </p>
         </div>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleRegister}>
+          <div>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Nome completo"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+            />
+          </div>
           <div>
             <input
               type="email"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Email"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
@@ -30,32 +67,36 @@ export default function Register() {
           </div>
           <div className="relative">
             <input
-              type={mostarSenha ? "text" : "password"}
+              type={mostrarSenha ? "text" : "password"}
               id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               type="button"
-              onClick={() => setmostarSenha(!mostarSenha)}
+              onClick={() => setMostrarSenha(!mostrarSenha)}
               className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-              {mostarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="relative">
             <input
-              type={confirmarSenha? "text" : "password"}
+              type={mostrarConfirmar ? "text" : "password"}
               id="confirm-password"
+              value={confirmarSenha}
+              onChange={(e) => setConfirmarSenha(e.target.value)}
               required
               placeholder="Confirmar senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               type="button"
-              onClick={() => setconfirmarSenha(!confirmarSenha)}
+              onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
               className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-              {confirmarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+              {mostrarConfirmar ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-600">

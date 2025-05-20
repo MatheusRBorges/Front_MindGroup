@@ -1,10 +1,32 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import api from "../services/api";
 
-export default function SenhaEsqucida() {
-  const [mostarSenha, setmostarSenha] = useState(false);
-  const [confirmarSenha, setconfirmarSenha] = useState(false);
+export default function ForgotPassword() {
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [mostrarConfirmar, setMostrarConfirmar] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [confirmarSenha, setconfirmarSenha] = useState<string>("");
+
+  const navigate = useNavigate();
+
+  const handleReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmarSenha) {
+      return alert("As senhas não coincidem.");
+    }
+
+    try {
+      await api.post("/auth/forgot-password", { email, password });
+      alert("Senha redefinida com sucesso!");
+      navigate("/");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Erro ao redefinir senha");
+    }
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
@@ -15,10 +37,12 @@ export default function SenhaEsqucida() {
             redefinir sua senha.
           </p>
         </div>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleReset}>
           <div>
             <input
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Email"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
@@ -26,30 +50,34 @@ export default function SenhaEsqucida() {
           </div>
           <div className="relative">
             <input
-              type={mostarSenha? "text" : "password"}
+              type={mostrarSenha ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Nova senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               type="button"
-              onClick={() => setmostarSenha(!mostarSenha)}
+              onClick={() => setMostrarSenha(!mostrarSenha)}
               className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-              {mostarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="relative">
             <input
-              type={confirmarSenha ? "text" : "password"}
+              type={mostrarConfirmar ? "text" : "password"}
+              value={confirmarSenha}
+              onChange={(e) => setconfirmarSenha(e.target.value)}
               required
               placeholder="Confirmar nova senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               type="button"
-              onClick={() => setconfirmarSenha(!confirmarSenha)}
+              onClick={() => setMostrarConfirmar(!mostrarConfirmar)}
               className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
-              {confirmarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+              {mostrarConfirmar ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <button

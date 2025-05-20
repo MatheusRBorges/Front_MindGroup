@@ -1,11 +1,30 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function Login() {
-  const [mostarSenha, setmostarSenha] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const navigate = useNavigate();
 
-  return (
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const res = await api.post("/auth/login", { email, password });
+
+      localStorage.setItem("token", res.data.token);
+
+      navigate("/home");
+    } catch (err: any) {
+      alert(err.response?.data?.message || "Erro ao fazer login");
+    }
+  };
+
+   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="w-full max-w-md space-y-6">
         <div>
@@ -15,11 +34,13 @@ export default function Login() {
             com a comunidade.
           </p>
         </div>
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleLogin}>
           <div>
             <input
               type="email"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="Email"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
@@ -27,22 +48,24 @@ export default function Login() {
           </div>
           <div className="relative">
             <input
-              type={mostarSenha ? "text" : "password"}
+              type={mostrarSenha ? "text" : "password"}
               id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="Senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
             <button
               type="button"
-              onClick={() => setmostarSenha(!mostarSenha)}
+              onClick={() => setMostrarSenha(!mostrarSenha)}
               className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
-              {mostarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
           </div>
           <div className="text-right">
             <Link
-              to="/senha_esquecida"
+              to="/forgot-password"
               className="text-sm text-gray-500 hover:underline">
               Esqueci minha senha
             </Link>
