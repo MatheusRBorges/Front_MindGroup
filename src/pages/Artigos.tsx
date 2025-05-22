@@ -46,8 +46,6 @@ export default function Artigos() {
     }
   };
 
-  console.log('posts', posts);
-
   return (
     <>
       <Navbar />
@@ -68,8 +66,8 @@ export default function Artigos() {
               )}
               <div className="p-4 flex-1 flex flex-col justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-black">{post.title}</h2>
-                  <p className="text-sm text-gray-700 mt-1 line-clamp-3">
+                  <h2 className="text-lg font-bold text-black break-words">{post.title}</h2>
+                  <p className="text-sm text-gray-700 mt-1 break-words line-clamp-3">
                     {post.content}
                   </p>
                 </div>

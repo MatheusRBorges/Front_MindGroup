@@ -38,24 +38,26 @@ export default function EditarArtigo() {
     e.preventDefault();
 
     try {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("content", content);
       if (image) {
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("content", content);
         formData.append("image", image);
+
+        await api.put(`/posts/${id}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        await api.put(`/posts/${id}`, { title, content, image: originalImageUrl }, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       }
-
-      await api.put(`/posts/${id}`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      alert("Artigo atualizado com sucesso!");
-      navigate("/meus-artigos");
+      navigate("/artigos");
     } catch {
-      alert("Erro ao atualizar o artigo.");
+      alert("Erro ao salvar as alterações.");
     }
   };
 
@@ -98,7 +100,7 @@ export default function EditarArtigo() {
           <label className="block text-sm mb-1 text-gray-700">Nova Imagem (opcional)</label>
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpg, image/jpeg, image/png"
             onChange={handleImageChange}
             className="w-full px-4 py-2 border rounded-md"
           />
@@ -114,12 +116,22 @@ export default function EditarArtigo() {
           )}
         </div>
 
-        <button
-          type="submit"
-          className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-900"
-        >
-          Salvar Alterações
-        </button>
+        <div className="flex gap-4">
+          <button
+            type="submit"
+            className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-900 transition"
+          >
+            Salvar Alterações
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="bg-gray-200 text-black px-6 py-2 rounded-md hover:bg-gray-300 transition"
+          >
+            Cancelar
+          </button>
+        </div>
       </form>
     </div>
   );

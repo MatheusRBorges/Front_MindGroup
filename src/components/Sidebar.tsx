@@ -1,44 +1,47 @@
 
-import { Link } from "react-router-dom";
-import { LogOut, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import { X } from "lucide-react";
 
-type SidebarProps = {
-  isOpen: boolean;
+interface SidebarProps {
   onClose: () => void;
-};
+}
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ onClose }: SidebarProps) {
   const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    onClose();
+    navigate("/");
+  };
 
   return (
-    <div
-      className={`fixed top-0 right-0 h-full w-64 bg-white shadow-lg p-6 z-50 transition-transform duration-300 ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      }`}
-    >
+    <div className="fixed top-0 right-0 h-full w-64 bg-white shadow-lg p-6 z-50 flex flex-col">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-lg font-semibold">Menu</h2>
-        <button onClick={onClose} className="text-gray-600">
-          <X size={20} />
+        <h2 className="text-xl font-semibold">Menu</h2>
+        <button onClick={onClose} className="text-gray-600 hover:text-gray-900">
+          <X size={24} />
         </button>
       </div>
 
-      <nav className="flex flex-col space-y-4 text-gray-800">
-        <Link to="/perfil" onClick={onClose}>👤 Perfil</Link>
-        <Link to="/meus-artigos" onClick={onClose}>📄 Meus Artigos</Link>
-        <Link to="/criar-artigo" onClick={onClose}>✍️ Criar Novo Artigo</Link>
-        <button
-          onClick={() => {
-            logout();
-            onClose();
-          }}
-          className="text-red-600 flex items-center space-x-1 mt-6"
-        >
-          <LogOut size={18} />
-          <span>Sair</span>
-        </button>
-      </nav>
+      <button
+        onClick={() => {
+          navigate("/perfil");
+          onClose();
+        }}
+        className="text-left mb-4 text-black hover:underline"
+      >
+        Perfil
+      </button>
+
+      <button
+        onClick={handleLogout}
+        className="text-left text-black hover:underline"
+      >
+        Logout
+      </button>
     </div>
   );
 }

@@ -18,18 +18,13 @@
       if (!title || !content) {
         return alert("Preencha todos os campos obrigatórios.");
       }
-
-      try {
-        console.log(title, content, image);
-
+      try { 
         const formData = new FormData();
         formData.append("title", title);
         formData.append("content", content);
         if (image) {
           formData.append("image", image);
         }
-
-        console.log(formData);
 
         await api.post("/posts", formData, {
           headers: {
@@ -62,6 +57,7 @@
             <label className="block text-sm mb-1 text-gray-700">Título</label>
             <input
               type="text"
+              maxLength={150}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
@@ -72,6 +68,7 @@
           <div>
             <label className="block text-sm mb-1 text-gray-700">Conteúdo</label>
             <textarea
+              maxLength={1000}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               className="w-full px-4 py-2 border rounded-md h-48 resize-none"
@@ -83,7 +80,7 @@
             <label className="block text-sm mb-1 text-gray-700">Imagem</label>
             <input
               type="file"
-              accept="image/*"
+              accept="image/jpg, image/jpeg, image/png"
               onChange={handleImageChange}
               className="w-full px-4 py-2 border rounded-md"
             />
@@ -99,12 +96,19 @@
             )}
           </div>
 
+        <div className="flex gap-4">
           <button
             type="submit"
-            className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-900"
-          >
-            Publicar
+            className="bg-black text-white px-6 py-2 rounded-md hover:bg-gray-900 transition">
+            Salvar Alterações
           </button>
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="bg-gray-200 text-black px-6 py-2 rounded-md hover:bg-gray-300 transition">
+            Cancelar
+          </button>
+        </div>
         </form>
       </div>
     );

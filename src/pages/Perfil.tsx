@@ -47,8 +47,6 @@ export default function Perfil() {
         const formData = new FormData();
         formData.append("avatar", avatarFile);
 
-        console.log('formData', formData);
-
         await api.put("/auth/profile/avatar/upload", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
