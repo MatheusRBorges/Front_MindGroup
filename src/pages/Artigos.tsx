@@ -4,6 +4,7 @@ import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
 import { Heart } from "lucide-react";
+import toast from "react-hot-toast";
 
 type Post = {
   id: number;
@@ -41,6 +42,7 @@ export default function Artigos() {
                 headers: { Authorization: `Bearer ${token}` },
               }),
             ]);
+
             return {
               ...post,
               likeCount: likeRes.data.count,
@@ -51,7 +53,7 @@ export default function Artigos() {
 
         setPosts(updatedPosts);
       } catch {
-        alert("Erro ao carregar artigos.");
+        toast.error("Erro ao carregar artigos.");
       }
     };
 

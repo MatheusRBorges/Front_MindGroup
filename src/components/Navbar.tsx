@@ -5,7 +5,7 @@ import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, isLoading } = useAuth();
   const [showSidebar, setShowSidebar] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -14,13 +14,6 @@ export default function Navbar() {
   const handleLogout = () => {
     logout();
     setDropdownOpen(false);
-  };
-
-  const getAvatarUrl = () => {
-    if (!user?.avatar) return "/default-avatar.png";
-    return user.avatar.startsWith("http")
-      ? user.avatar
-      : `http://localhost:3000/uploads/${user.avatar}`;
   };
 
   useEffect(() => {
@@ -35,6 +28,21 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+
+  const avatarUrl = user?.avatar
+    ? user.avatar.startsWith("http")
+      ? user.avatar
+      : `http://localhost:3000/uploads/${user.avatar}`
+    : "/default-avatar.png";
+
+  if (isLoading) {
+    return (
+      <nav className="p-4 border-b bg-white shadow-sm">
+        <p className="text-sm text-gray-500">Carregando...</p>
+      </nav>
+    );
+  }
 
   return (
     <nav className="flex justify-between items-center border-b px-6 py-4 bg-white shadow-sm relative">
@@ -65,7 +73,7 @@ export default function Navbar() {
           </>
         ) : (
           <>
-    
+
             <li className="block md:hidden">
               <button
                 onClick={() => setShowSidebar(true)}
@@ -81,7 +89,7 @@ export default function Navbar() {
                 className="focus:outline-none focus:ring-2 focus:ring-black rounded-full"
               >
                 <img
-                  src={getAvatarUrl()}
+                  src={avatarUrl}
                   alt="Avatar"
                   className="w-8 h-8 rounded-full border object-cover"
                 />

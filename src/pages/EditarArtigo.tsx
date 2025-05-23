@@ -39,7 +39,6 @@ export default function EditarArtigo() {
       await api.put(`/posts/${id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
         },
       });
 

@@ -67,10 +67,10 @@ export default function Perfil() {
   const avatarSrc = avatarFile
     ? URL.createObjectURL(avatarFile)
     : avatar
-    ? avatar.startsWith("http")
-      ? avatar
-      : `http://localhost:3000/uploads/${avatar}`
-    : "/default-avatar.png";
+      ? avatar.startsWith("http")
+        ? avatar
+        : `http://localhost:3000/uploads/${avatar}`
+      : "/default-avatar.png";
 
   return (
     <div className="max-w-xl mx-auto mt-10 bg-white p-8 shadow-lg rounded-lg">
@@ -147,6 +147,16 @@ export default function Perfil() {
           Salvar
         </button>
       </form>
+
+      <div className="flex justify-center mt-6">
+        <button
+          type="button"
+          onClick={() => window.history.back()}
+          className="text-sm text-black underline hover:text-gray-700 transition"
+        >
+          ← Voltar
+        </button>
+      </div>
     </div>
   );
 }
