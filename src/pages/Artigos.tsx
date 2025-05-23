@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../components/Navbar";
+import { Heart } from "lucide-react";
 
 type Post = {
   id: number;
@@ -16,22 +17,46 @@ type Post = {
   };
 };
 
+type PostWithLike = Post & {
+  liked: boolean;
+  likeCount: number;
+};
+
 export default function Artigos() {
   const { user, token } = useAuth();
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<PostWithLike[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchPosts = async () => {
       try {
         const res = await api.get("/posts");
-        setPosts(res.data);
+        const posts: Post[] = res.data;
+
+        const updatedPosts = await Promise.all(
+          posts.map(async (post) => {
+            const [likeRes, likedRes] = await Promise.all([
+              api.get(`/posts/${post.id}/likes`),
+              api.get(`/posts/${post.id}/liked`, {
+                headers: { Authorization: `Bearer ${token}` },
+              }),
+            ]);
+            return {
+              ...post,
+              likeCount: likeRes.data.count,
+              liked: likedRes.data.liked,
+            };
+          })
+        );
+
+        setPosts(updatedPosts);
       } catch {
         alert("Erro ao carregar artigos.");
       }
     };
 
     fetchPosts();
-  }, []);
+  }, [token]);
 
   const handleDelete = async (id: number) => {
     if (!confirm("Deseja mesmo excluir este artigo?")) return;
@@ -46,6 +71,27 @@ export default function Artigos() {
     }
   };
 
+  const toggleLike = async (id: number) => {
+    try {
+      const res = await api.post(`/posts/${id}/like`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === id
+            ? {
+                ...post,
+                liked: res.data.liked,
+                likeCount: res.data.liked ? post.likeCount + 1 : post.likeCount - 1,
+              }
+            : post
+        )
+      );
+    } catch {
+      alert("Erro ao curtir/descurtir artigo.");
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -55,7 +101,8 @@ export default function Artigos() {
           {posts.map((post) => (
             <div
               key={post.id}
-              className="bg-white shadow-md rounded-md overflow-hidden flex flex-col"
+              onClick={() => navigate(`/artigo/${post.id}`)}
+              className="bg-white shadow-md rounded-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition"
             >
               {post.image && (
                 <img
@@ -72,22 +119,36 @@ export default function Artigos() {
                   </p>
                 </div>
                 <div className="mt-3 text-sm text-gray-500">
-                  Por {post.author?.name} -{" "}
-                  {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
+                  Por {post.author?.name} - {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
                 </div>
                 <div className="mt-4 flex items-center justify-between">
-                  <span className="text-red-500 text-sm">❤️ 12</span>
-
-                  {post && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleLike(post.id);
+                    }}
+                    className="flex items-center gap-1 text-sm text-gray-600 hover:text-red-500"
+                  >
+                    <Heart
+                      size={18}
+                      className={post.liked ? "text-red-500 fill-red-500" : "text-gray-600"}
+                    />
+                    {post.likeCount}
+                  </button>
+                  {user?.id === post.author?.id && (
                     <div className="space-x-4 text-sm">
                       <Link
                         to={`/editar-artigo/${post.id}`}
+                        onClick={(e) => e.stopPropagation()}
                         className="text-blue-600 hover:underline"
                       >
                         Editar
                       </Link>
                       <button
-                        onClick={() => handleDelete(post.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(post.id);
+                        }}
                         className="text-red-600 hover:underline"
                       >
                         Excluir

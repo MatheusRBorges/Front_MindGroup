@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function EditarArtigo() {
   const { token } = useAuth();
@@ -12,52 +13,40 @@ export default function EditarArtigo() {
   const [content, setContent] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      if (!id) return;
-      try {
-        const res = await api.get(`/posts/${id}`);
+    if (!id) return;
+    api.get(`/posts/${id}`)
+      .then(res => {
         setTitle(res.data.title);
         setContent(res.data.content);
-        setOriginalImageUrl(res.data.image || null);
         setImagePreview(res.data.image || null);
-      } catch {
-        alert("Erro ao carregar o artigo.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPost();
+      })
+      .catch(() => toast.error("Erro ao carregar o artigo."))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      if (image) {
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("content", content);
-        formData.append("image", image);
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("content", content);
+      if (image) formData.append("image", image);
 
-        await api.put(`/posts/${id}`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        });
-      } else {
-        await api.put(`/posts/${id}`, { title, content, image: originalImageUrl }, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-      }
-      navigate("/artigos");
+      await api.put(`/posts/${id}`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      toast.success("Artigo atualizado com sucesso!");
+      navigate("/meus-artigos");
     } catch {
-      alert("Erro ao salvar as alterações.");
+      toast.error("Erro ao atualizar o artigo.");
     }
   };
 

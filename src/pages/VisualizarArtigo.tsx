@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 type Post = {
   id: number;
@@ -24,7 +25,7 @@ export default function VisualizarArtigo() {
         const res = await api.get(`/posts/${id}`);
         setPost(res.data);
       } catch {
-        alert("Erro ao carregar o artigo.");
+        toast.error("Erro ao carregar o artigo.");
       } finally {
         setLoading(false);
       }
@@ -41,8 +42,8 @@ export default function VisualizarArtigo() {
       {post.image && (
         <img
           src={`http://localhost:3000/uploads/${post.image}`}
-          alt={post.title}
-          className="w-full h-64 object-cover rounded mb-4"
+          alt={`Imagem do artigo ${post.title}`}
+          className="w-full h-64 object-cover rounded mb-6"
         />
       )}
       <h1 className="text-3xl font-bold mb-2 text-black break-words">{post.title}</h1>
@@ -50,19 +51,19 @@ export default function VisualizarArtigo() {
         Por {post.author?.name || "Autor desconhecido"} -{" "}
         {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
       </p>
-      <p className="text-gray-800 whitespace-pre-line leading-relaxed break-words">
+      <p className="text-gray-800 whitespace-pre-line leading-relaxed break-words mb-6">
         {post.content}
       </p>
-      <div className="mt-6 flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4">
         <Link
           to="/home"
-          className="text-sm text-white bg-black  hover:bg-gray-700 px-4 py-2 rounded transition"
+          className="text-sm text-white bg-black hover:bg-gray-800 px-4 py-2 rounded transition"
         >
           ← Voltar para Home
         </Link>
         <Link
           to="/artigos"
-          className="text-sm text-white bg-black hover:bg-gray-700 px-4 py-2 rounded transition"
+          className="text-sm text-white bg-black hover:bg-gray-800 px-4 py-2 rounded transition"
         >
           Ir para Artigos →
         </Link>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function MeusArtigos() {
   const { token } = useAuth();
@@ -18,20 +19,22 @@ export default function MeusArtigos() {
       });
       setPosts(res.data);
     } catch (err) {
-      alert("Erro ao carregar seus artigos.");
+      toast.error("Erro ao carregar seus artigos.");
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Tem certeza que deseja excluir este artigo?")) return;
+    if (!window.confirm("Tem certeza que deseja excluir este artigo?")) return;
+
     try {
       await api.delete(`/posts/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setPosts((prev) => prev.filter((post) => post.id !== id));
-      alert("Artigo deletado com sucesso.");
-    } catch {
-      alert("Erro ao deletar o artigo.");
+      toast.success("Artigo deletado com sucesso!");
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || "Erro ao deletar o artigo.";
+      toast.error(msg);
     }
   };
 
@@ -54,7 +57,8 @@ export default function MeusArtigos() {
             <h2 className="font-semibold text-lg break-words">{post.title}</h2>
             <p className="text-sm text-gray-600 break-words">{post.content}</p>
             <p className="text-xs text-gray-400 mt-1">
-              Publicado em {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
+              Publicado em{" "}
+              {new Date(post.publishedAt).toLocaleDateString("pt-BR")}
             </p>
             <div className="mt-2 space-x-4">
               <Link
@@ -72,6 +76,15 @@ export default function MeusArtigos() {
             </div>
           </div>
         ))}
+
+        <div className="flex flex-wrap gap-4">
+          <Link
+            to="/home"
+            className="text-sm text-white bg-black hover:bg-gray-800 px-4 py-2 rounded transition"
+          >
+            ← Voltar para Home
+          </Link>
+        </div>
       </div>
     </div>
   );

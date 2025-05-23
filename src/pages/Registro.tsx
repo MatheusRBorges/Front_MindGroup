@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import api from "../services/api";
+import toast from "react-hot-toast";
 
 export default function Register() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -14,19 +15,39 @@ export default function Register() {
 
   const navigate = useNavigate();
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!name || !email || !password || !confirmarSenha) {
+      toast.error("Preencha todos os campos.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error("Digite um e-mail válido.");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("A senha deve ter no mínimo 6 caracteres.");
+      return;
+    }
+
     if (password !== confirmarSenha) {
-      return alert("Senhas não coincidem!");
+      toast.error("As senhas não coincidem.");
+      return;
     }
 
     try {
       await api.post("/auth/register", { name, email, password });
-      alert("Conta criada com sucesso!");
+      toast.success("Conta criada com sucesso!");
       navigate("/");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Erro ao registrar");
+      toast.error(err.response?.data?.message || "Erro ao registrar.");
     }
   };
 
@@ -41,29 +62,23 @@ export default function Register() {
         </div>
 
         <form className="space-y-4" onSubmit={handleRegister}>
-          <div>
-            <input
-              type="text"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Nome completo"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-            />
-          </div>
+          <input
+            type="text"
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nome completo"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+          />
 
-          <div>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              placeholder="Email"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
-            />
-          </div>
+          <input
+            type="email"
+            id="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+          />
 
           <div className="relative">
             <input
@@ -71,7 +86,6 @@ export default function Register() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               placeholder="Senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
@@ -90,7 +104,6 @@ export default function Register() {
               id="confirmar-senha"
               value={confirmarSenha}
               onChange={(e) => setConfirmarSenha(e.target.value)}
-              required
               placeholder="Confirmar senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />

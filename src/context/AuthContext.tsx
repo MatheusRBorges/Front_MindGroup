@@ -15,7 +15,8 @@ type AuthContextType = {
   login: (user: User, token: string) => void;
   logout: () => void;
   isLoading: boolean;
-};
+  updateUser: (updatedUser: Partial<User>) => void;
+}
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -47,6 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/home");
   };
 
+  const updateUser = (updatedUser: Partial<User>) => {
+  setUser((prev) => (prev ? { ...prev, ...updatedUser } : prev));
+};
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -57,7 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

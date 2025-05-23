@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { Eye, EyeOff } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function Login() {
   const [mostrarSenha, setMostrarSenha] = useState(false);
@@ -12,15 +13,30 @@ export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const validateEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast.error("Preencha todos os campos.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      toast.error("Digite um e-mail válido.");
+      return;
+    }
 
     try {
       const res = await api.post("/auth/login", { email, password });
       login(res.data.user, res.data.token);
+      toast.success("Login realizado com sucesso!");
       navigate("/home");
     } catch (err: any) {
-      alert(err.response?.data?.message || "Erro ao fazer login");
+      toast.error(err.response?.data?.message || "Erro ao fazer login.");
     }
   };
 
@@ -41,7 +57,6 @@ export default function Login() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              required
               placeholder="Email"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />
@@ -53,7 +68,6 @@ export default function Login() {
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              required
               placeholder="Senha"
               className="w-full px-4 py-2 pr-10 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
             />

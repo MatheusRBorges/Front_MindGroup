@@ -35,7 +35,7 @@ export default function Sidebar({ onClose }: SidebarProps) {
       >
         Perfil
       </button>
-
+      
       <button
         onClick={handleLogout}
         className="text-left text-black hover:underline"
